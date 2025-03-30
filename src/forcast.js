@@ -8,40 +8,41 @@ function Forcast(props) {
   const [error, setError] = useState("");
   const [weather, setWeather] = useState({});
 
-  const search = (city) => {
-    axios
-      .get(
+  const search = async (city) => {
+    try {
+      const response = await axios.get(
         `${apiKeys.base}weather?q=${
-          city != "[object Object]" ? city : query
+          city !== "[object Object]" ? city : query
         }&units=metric&APPID=${apiKeys.key}`
-      )
-      .then((response) => {
-        setWeather(response.data);
-        setQuery("");
-      })
-      .catch(function (error) {
-        console.log(error);
-        setWeather("");
-        setQuery("");
-        setError({ message: "Not Found", query: query });
-      });
+      );
+      setWeather(response.data);
+      setQuery("");
+    } catch (error) {
+      console.log(error);
+      setWeather("");
+      setQuery("");
+      setError({ message: "Not Found", query: query });
+    }
   };
-  // function checkTime(i) {
-  //   if (i < 10) {
-  //     i = "0" + i;
-  //   } // add zero in front of numbers < 10
-  //   return i;
-  // }
+
+  
+
+  useEffect(() => {
+    search("Delhi");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Disable the warning for this line
+
+  const handleSearch = () => {
+    if (query.trim()) {
+      search(query);
+    }
+  };
 
   const defaults = {
     color: "white",
     size: 112,
     animate: true,
   };
-
-  useEffect(() => {
-    search("Delhi");
-  }, []);
 
   return (
     <div className="forecast">
@@ -62,20 +63,19 @@ function Forcast(props) {
             placeholder="Search any city"
             onChange={(e) => setQuery(e.target.value)}
             value={query}
+            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
           />
           <div className="img-box">
-            {" "}
             <img
               alt=""
               src="https://images.avishkaar.cc/workflow/newhp/search-white.png"
-              onClick={search}
+              onClick={handleSearch}
             />
           </div>
         </div>
         <ul>
-          {typeof weather.main != "undefined" ? (
+          {typeof weather.main !== "undefined" ? (
             <div>
-              {" "}
               <li className="cityHead">
                 <p>
                   {weather.name}, {weather.sys.country}
@@ -121,4 +121,5 @@ function Forcast(props) {
     </div>
   );
 }
+
 export default Forcast;
